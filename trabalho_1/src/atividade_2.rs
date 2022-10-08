@@ -1,6 +1,18 @@
 use std::io;
 use rand::distributions::{Bernoulli, Distribution};
 
+fn print_result(count_a: &i32, count_b: &i32, a_survival_prob: &f64, b_survival_prob: &f64) {
+    println!("-------------------------------------------------------------------------------------------------");
+    println!("Número de Duelos Vencidos por A: {} - Probabilidade de A sobreviver: {}", *count_a, *a_survival_prob);
+    println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", *count_b, *b_survival_prob);
+    println!("-------------------------------------------------------------------------------------------------");
+}
+
+fn update_probability_values(value: &mut f64, generator: &mut Bernoulli, probability_a: f64 , probability_b: f64) {
+    (*value) = (*value) * (1.0-probability_a) * (1.0-probability_b);
+    (*generator) = Bernoulli::new(*value).unwrap();
+}
+
 pub fn main() {
 
     let mut n = String::new();
@@ -15,52 +27,26 @@ pub fn main() {
 
     let number_of_simulations: i32 = n.trim().parse().expect("Input not an integer");
 
-    for _number in 0..number_of_simulations {
+    for _number in 0..number_of_simulations {        
 
-        let mut duel_ended = false;
+        // Each shooter precision when shooting
+        let probabilities = [4.0/6.0, 5.0/6.0, 2.0/6.0];
 
-        let probability_a: f64 = 4.0/6.0;
-        let probability_b: f64 = 5.0/6.0;
-        let probability_c: f64 = 2.0/6.0;
-
-        let mut probability_a_aux: f64 = 4.0/6.0;
-        let mut probability_b_aux: f64 = (5.0/6.0)*(1.0-probability_a);
-
-        let mut prob_a = Bernoulli::new(probability_a).unwrap();
-        let mut prob_b = Bernoulli::new(probability_b).unwrap();
-
-        while !duel_ended {            
-            let value_a = prob_a.sample(&mut rand::thread_rng());
-
-            if value_a != true {
-                
-                probability_a_aux = probability_a_aux * (1.0-probability_a) * (1.0-probability_b);
-                prob_a = Bernoulli::new(probability_a).unwrap();
-
-                let value_b = prob_b.sample(&mut rand::thread_rng()); 
-                
-                if !value_b {
-                    probability_b_aux = probability_b_aux * (1.0-probability_a) * (1.0-probability_b);
-                    prob_b = Bernoulli::new(probability_b).unwrap();
-                } else {
-                    count_b+=1;
-                    duel_ended = true;
-                }
-                
-                
-            } else {
-                count_a+=1;
-                duel_ended = true;
-            }        
-        }        
-    }
-
-    let a_survival_prob: f64 = (count_a as f64) / (number_of_simulations as f64);
-    let b_survival_prob: f64 = (count_b as f64) / (number_of_simulations as f64);
-
-    println!("-------------------------------------------------------------------------------------------------");
-    println!("Número de Duelos Vencidos por A: {} - Probabilidade de A sobreviver: {}", count_a, a_survival_prob);
-    println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", count_b, b_survival_prob);
-    println!("-------------------------------------------------------------------------------------------------");
+        for i in 0..1 {
+            
+            // Tuple of "shooters" - 0: boolean pointing is shooter is alive or not, 1: random number generator based on precision
+            let mut shooters = [
+                (true, Bernoulli::new(probabilities[0]).unwrap()),
+                (true, Bernoulli::new(probabilities[1]).unwrap()),
+                (true, Bernoulli::new(probabilities[2]).unwrap())
+            ];
+            
+            let mut duel_ended = false;
+            
+            let mut probability_a_aux: f64 = probabilities[0];
+            let mut probability_b_aux: f64 = probabilities[1]*(1.0-probabilities[0]);
+            let mut probability_b_aux: f64 = probabilities[2]*(1.0-probabilities[0])*(1.0-probabilities[1]);
+        }
+    }        
 
 }

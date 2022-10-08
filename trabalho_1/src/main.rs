@@ -12,8 +12,9 @@ fn main() {
     
     let choice:char = n.trim().parse().expect("Input not an integer");
 
-    if choice == '1' {
-        atividade_1::main();
-    } else { println!("Escolha inexistente!") }
-
+    match choice {
+        '1' => atividade_1::main(),
+        '2' => atividade_2::main(),
+        '3' => println!("Atividade não existente!")
+    }
 }
