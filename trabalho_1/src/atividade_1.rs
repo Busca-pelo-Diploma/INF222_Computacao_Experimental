@@ -1,18 +1,6 @@
 use std::io;
 use rand::distributions::{Bernoulli, Distribution};
 
-fn print_result(count_a: &i32, count_b: &i32, a_survival_prob: &f64, b_survival_prob: &f64) {
-    println!("-------------------------------------------------------------------------------------------------");
-    println!("Número de Duelos Vencidos por A: {} - Probabilidade de A sobreviver: {}", *count_a, *a_survival_prob);
-    println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", *count_b, *b_survival_prob);
-    println!("-------------------------------------------------------------------------------------------------");
-}
-
-fn update_probability_values(value: &mut f64, generator: &mut Bernoulli, probability_a: f64 , probability_b: f64) {
-    (*value) = (*value) * (1.0-probability_a) * (1.0-probability_b);
-    (*generator) = Bernoulli::new(*value).unwrap();
-}
-
 pub fn main() {
 
     let mut n = String::new();
@@ -43,19 +31,21 @@ pub fn main() {
             let value_a = prob_a.sample(&mut rand::thread_rng());
 
             if value_a != true {
-                
-                update_probability_values(&mut probability_a_aux, &mut prob_a, probability_a, probability_b);
+
+                probability_a_aux = probability_a_aux * (1.0-probability_a) * (1.0-probability_b);
+                prob_a = Bernoulli::new(probability_a).unwrap();
 
                 let value_b = prob_b.sample(&mut rand::thread_rng()); 
-                
+
                 if !value_b {
-                    update_probability_values(&mut probability_b_aux, &mut prob_b, probability_a, probability_b);
+                    probability_b_aux = probability_b_aux * (1.0-probability_a) * (1.0-probability_b);
+                    prob_b = Bernoulli::new(probability_b).unwrap();
                 } else {
                     count_b+=1;
                     duel_ended = true;
                 }
-                
-                
+
+
             } else {
                 count_a+=1;
                 duel_ended = true;
@@ -66,6 +56,9 @@ pub fn main() {
     let a_survival_prob: f64 = (count_a as f64) / (number_of_simulations as f64);
     let b_survival_prob: f64 = (count_b as f64) / (number_of_simulations as f64);
 
-    print_result(&count_a, &count_b, &a_survival_prob, &b_survival_prob);
+    println!("-------------------------------------------------------------------------------------------------");
+    println!("Número de Duelos Vencidos por A: {} - Probabilidade de A sobreviver: {}", count_a, a_survival_prob);
+    println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", count_b, b_survival_prob);
+    println!("-------------------------------------------------------------------------------------------------");
 
 }
