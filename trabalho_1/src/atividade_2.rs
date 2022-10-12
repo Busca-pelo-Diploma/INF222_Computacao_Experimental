@@ -1,25 +1,27 @@
 use std::io;
 use rand::distributions::{Bernoulli, Distribution};
 
-/*fn print_result(count_a: &i32, count_b: &i32, a_survival_prob: &f64, b_survival_prob: &f64) {
-    println!("-------------------------------------------------------------------------------------------------");
-    println!("Número de Duelos Vencidos por A: {} - Probabilidade de A sobreviver: {}", *count_a, *a_survival_prob);
-    println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", *count_b, *b_survival_prob);
-    println!("-------------------------------------------------------------------------------------------------");
-}*/
-
-/*fn update_probability_values(value: &mut f64, generator: &mut Bernoulli, probability_a: f64 , probability_b: f64) {
-    (*value) = (*value) * (1.0-probability_a) * (1.0-probability_b);
-    (*generator) = Bernoulli::new(*value).unwrap();
-}*/
+fn print(count: &[i32;3], count_second_strategy: &[i32;3], survival_prob: &[f64;3], survival_prob_second_strategy: &[f64;3]) {
+    println!("-----------------------------------------------------------------------------");
+    println!("-------------------------- Primeira Estratégia:------------------------------");
+    println!("-----------------------------------------------------------------------------");
+    println!("Número de Duelos Vencidos por A: {} - Probabilidade de A sobreviver: {}", count[0], survival_prob[0]);
+    println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", count[1], survival_prob[1]);
+    println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", count[2], survival_prob[2]);
+    println!("-----------------------------------------------------------------------------");
+    println!("-------------------------- Segunda Estratégia:------------------------------");
+    println!("-----------------------------------------------------------------------------");
+    println!("Número de Duelos Vencidos por A: {} - Probabilidade de A sobreviver: {}", count_second_strategy[0], survival_prob_second_strategy[0]);
+    println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", count_second_strategy[1], survival_prob_second_strategy[1]);
+    println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", count_second_strategy[2], survival_prob_second_strategy[2]);
+}
 
 pub fn main() {
 
     let mut n = String::new();
 
-    let mut count_a = 0;    
-    let mut count_b = 0;
-    let mut count_c = 0;
+    let mut count = [0, 0, 0];    
+    let mut count_second_strategy = [0, 0, 0];
 
     println!("Escolha quantas vezes a simulação será feita!");
 
@@ -27,24 +29,17 @@ pub fn main() {
 
     let number_of_simulations: i32 = n.trim().parse().expect("Input not an integer");
 
-    for _number in 0..number_of_simulations {        
+    // First strategy - all shooters go for the highest precision marksman
+    for _number in 0..number_of_simulations {
 
         // Each shooter precision when shooting
-        let probabilities = [4.0/6.0, 5.0/6.0, 2.0/6.0];
+        let probabilities = [(4,6), (5,6), (2,6)];
         
         // Tuple of "shooters" - 0: boolean pointing is shooter is alive or not, 1: random number generator based on precision
         let mut shooters = [
-            (true, Bernoulli::new(probabilities[0]).unwrap()),
-            (true, Bernoulli::new(probabilities[1]).unwrap()),
-            (true, Bernoulli::new(probabilities[2]).unwrap())
-        ];
-        
-        //let mut duel_ended = false;
-
-        let mut probabilities_aux = [
-            probabilities[0],
-            probabilities[1]*(1.0-probabilities[0]),
-            probabilities[2]*(1.0-probabilities[0])*(1.0-probabilities[1])
+            (true, Bernoulli::from_ratio(probabilities[0].0, probabilities[0].1).unwrap()),
+            (true, Bernoulli::from_ratio(probabilities[1].0, probabilities[1].1).unwrap()),
+            (true, Bernoulli::from_ratio(probabilities[2].0, probabilities[2].1).unwrap())
         ];
         
         loop {
@@ -53,45 +48,140 @@ pub fn main() {
                 let shot = shooters[0].1.sample(&mut rand::thread_rng());
 
                 if shot == true {
-                    if shooters[1].0 == true { shooters[1].0 = false; }
-                    else { 
-                        count_a+=1;                    
+                    if shooters[1].0 == true { 
+                        shooters[1].0 = false;
+                        if shooters[2].0 == false {
+                            count[0]+=1;
+                            break;
+                        }
+                    } else if shooters[2].0 == true {
+                        count[0]+=1;
                         break;
                     }
-                } else {
-                    //update_probability_values(value, generator, probability_a, probability_b);
                 }
-            } 
+            }
             
-            if shooters[1].0 == true {                
+            if shooters[1].0 == true {
                 let shot = shooters[1].1.sample(&mut rand::thread_rng());
 
                 if shot == true {
-                    if shooters[2].0 == true { shooters[2].0 = false; }
-                    else {
-                        count_b+=1;
+                    if shooters[0].0 == true { 
+                        shooters[0].0 = false;
+                        if shooters[2].0 == false {
+                            count[1]+=1;
+                            break;
+                        }
+                    } else if shooters[2].0 == true {
+                        count[1]+=1;
                         break;
                     }
-                } else {
-                    //update_probability_values(value, generator, probability_a, probability_b);
                 }
-            }
+            }            
             
             if shooters[2].0 == true {
                 let shot = shooters[2].1.sample(&mut rand::thread_rng());
 
                 if shot == true {
-                    if shooters[0].0 == true { shooters[0].0 = false; }
-                    else {
-                        count_c+=1;
+                    if shooters[1].0 == true { 
+                        shooters[1].0 = false;
+                        if shooters[0].0 == false {
+                            count[2]+=1;
+                            break;
+                        }
+                    } else if shooters[0].0 == true {
+                        count[2]+=1;
                         break;
                     }
-                } else {
-                    //update_probability_values(value, generator, probability_a, probability_b);
                 }
             }
+            
         }
         
-    }        
+    }
+
+    // Second estrategy - third shooters misses until one of the others is dead
+    for _number in 0..number_of_simulations {
+
+        // Each shooter precision when shooting
+        let probabilities = [(4,6), (5,6), (2,6)];
+        
+        // Tuple of "shooters" - 0: boolean pointing is shooter is alive or not, 1: random number generator based on precision
+        let mut shooters = [
+            (true, Bernoulli::from_ratio(probabilities[0].0, probabilities[0].1).unwrap()),
+            (true, Bernoulli::from_ratio(probabilities[1].0, probabilities[1].1).unwrap()),
+            (true, Bernoulli::from_ratio(probabilities[2].0, probabilities[2].1).unwrap())
+        ];
+        
+        loop {
+
+            if shooters[0].0 == true {
+                let shot = shooters[0].1.sample(&mut rand::thread_rng());
+
+                if shot == true {
+                    if shooters[1].0 == true { 
+                        shooters[1].0 = false;
+                        if shooters[2].0 == false {
+                            count_second_strategy[0]+=1;
+                            break;
+                        }
+                    } else if shooters[2].0 == true {
+                        count_second_strategy[0]+=1;
+                        break;
+                    }
+                }
+            }
+            
+            if shooters[1].0 == true {
+                let shot = shooters[1].1.sample(&mut rand::thread_rng());
+
+                if shot == true {
+                    if shooters[0].0 == true { 
+                        shooters[0].0 = false;
+                        if shooters[2].0 == false {
+                            count_second_strategy[1]+=1;
+                            break;
+                        }
+                    } else if shooters[2].0 == true {
+                        count_second_strategy[1]+=1;
+                        break;
+                    }
+                }
+            }            
+            
+            if shooters[2].0 == true && (shooters[0].0 ^ shooters[1].0) {
+                let shot = shooters[2].1.sample(&mut rand::thread_rng());
+
+                if shot == true {
+                    if shooters[1].0 == true { 
+                        shooters[1].0 = false;
+                        if shooters[0].0 == false {
+                            count_second_strategy[2]+=1;
+                            break;
+                        }
+                    } else if shooters[0].0 == true {
+                        count_second_strategy[2]+=1;
+                        break;
+                    }
+                }
+            }
+            
+        }
+        
+    }
+    
+    
+    let survival_prob = [
+        (count[0] as f64) / (number_of_simulations as f64),
+        (count[1] as f64) / (number_of_simulations as f64),
+        (count[2] as f64) / (number_of_simulations as f64),
+    ];
+
+    let survival_prob_second_strategy = [
+        (count_second_strategy[0] as f64) / (number_of_simulations as f64),
+        (count_second_strategy[1] as f64) / (number_of_simulations as f64),
+        (count_second_strategy[2] as f64) / (number_of_simulations as f64)
+    ];
+
+    print(&count, &count_second_strategy, &survival_prob, &survival_prob_second_strategy);
 
 }
