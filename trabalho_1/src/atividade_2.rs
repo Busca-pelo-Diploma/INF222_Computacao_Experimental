@@ -9,7 +9,7 @@ fn print(count: &[i32;3], count_second_strategy: &[i32;3], survival_prob: &[f64;
     println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", count[1], survival_prob[1]);
     println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", count[2], survival_prob[2]);
     println!("-----------------------------------------------------------------------------");
-    println!("-------------------------- Segunda Estratégia:------------------------------");
+    println!("--------------------------- Segunda Estratégia:------------------------------");
     println!("-----------------------------------------------------------------------------");
     println!("Número de Duelos Vencidos por A: {} - Probabilidade de A sobreviver: {}", count_second_strategy[0], survival_prob_second_strategy[0]);
     println!("Número de Duelos Vencidos por B: {} - Probabilidade de B sobreviver: {}", count_second_strategy[1], survival_prob_second_strategy[1]);
