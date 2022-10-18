@@ -1,5 +1,6 @@
 mod atividade_1;
 mod atividade_2;
+mod atividade_3;
 use std::io;
 
 fn main() {
@@ -15,7 +16,7 @@ fn main() {
     match choice {
         1 => atividade_1::main(),
         2 => atividade_2::main(),
-        3 => println!("Atividade ainda não está pronta!"),
+        3 => atividade_3::main(),
         _ => println!("Atividade não existente! Execução encerrada!")
     }
 }
